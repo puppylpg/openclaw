@@ -281,3 +281,28 @@
   - `node --import tsx scripts/release-check.ts`
   - `pnpm release:check`
   - `pnpm test:install:smoke` or `OPENCLAW_INSTALL_SMOKE_SKIP_NONROOT=1 pnpm test:install:smoke` for non-root smoke path.
+
+## Cursor Cloud specific instructions
+
+### Environment
+
+- Node 22+ and pnpm 10.23.0 are required. The VM ships with both pre-installed via corepack.
+- No external databases or services are required; all state is local under `~/.openclaw/`.
+- Native addons (sharp, node-pty, sqlite-vec) are built during `pnpm install` via `pnpm.onlyBuiltDependencies` in `package.json`; no manual approval step is needed.
+
+### Key commands (see `package.json` scripts and AGENTS.md "Build, Test, and Development Commands" for full list)
+
+- **Install deps:** `pnpm install`
+- **Build:** `pnpm build`
+- **Lint/format/typecheck:** `pnpm check`
+- **Tests:** `OPENCLAW_TEST_PROFILE=low OPENCLAW_TEST_SERIAL_GATEWAY=1 pnpm test` (use low profile to avoid memory pressure on constrained VMs)
+- **Dev gateway:** `pnpm gateway:dev` (sets `OPENCLAW_SKIP_CHANNELS=1` automatically; listens on port 18789)
+- **Dev CLI:** `pnpm openclaw <command>`
+
+### Gotchas
+
+- The gateway dev mode (`pnpm gateway:dev`) triggers an auto-build if `dist/` is stale. First start takes ~10-15s extra.
+- `pnpm gateway:dev` auto-generates an auth token and stores it in `~/.openclaw-dev/openclaw.json`. To interact with the gateway API from curl, read the token from that file.
+- The `pnpm test` script runs multiple Vitest configs in parallel via `scripts/test-parallel.mjs`. On memory-constrained hosts, set `OPENCLAW_TEST_PROFILE=low OPENCLAW_TEST_SERIAL_GATEWAY=1`.
+- The web Control UI (`ui/`) auto-installs its deps and builds on first gateway start if the assets are missing.
+- `pnpm build` includes a canvas bundle step (`scripts/bundle-a2ui.sh`) that uses rolldown.
