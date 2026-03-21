@@ -306,3 +306,5 @@
 - The `pnpm test` script runs multiple Vitest configs in parallel via `scripts/test-parallel.mjs`. On memory-constrained hosts, set `OPENCLAW_TEST_PROFILE=low OPENCLAW_TEST_SERIAL_GATEWAY=1`.
 - The web Control UI (`ui/`) auto-installs its deps and builds on first gateway start if the assets are missing.
 - `pnpm build` includes a canvas bundle step (`scripts/bundle-a2ui.sh`) that uses rolldown.
+- CLI commands against the dev gateway need `OPENCLAW_STATE_DIR=~/.openclaw-dev` to pick up the dev config/token. Without it, the CLI reads `~/.openclaw/openclaw.json` which lacks the dev gateway token.
+- The agent command (`openclaw agent --message ...`) requires a model provider API key (e.g., `ANTHROPIC_API_KEY`). Without one the full pipeline still runs but fails at model invocation with a clear `FailoverError`.
