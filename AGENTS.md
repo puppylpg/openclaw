@@ -206,3 +206,19 @@
 - For manual `openclaw message send` messages that include `!`, use the heredoc pattern noted below to avoid the Bash tool’s escaping.
 - Release guardrails: do not change version numbers without operator’s explicit consent; always ask permission before running any npm publish/release step.
 - Beta release guardrail: when using a beta Git tag (for example `vYYYY.M.D-beta.N`), publish npm with a matching beta version suffix (for example `YYYY.M.D-beta.N`) rather than a plain version on `--tag beta`; otherwise the plain version name gets consumed/blocked.
+
+## Cursor Cloud specific instructions
+
+- **Runtime**: Node 22+ and pnpm 10.23.0 are pre-installed. Bun is not available in Cloud VMs but is not required; all commands work with Node/pnpm.
+- **Dependencies**: `pnpm install` is the update script and runs on VM startup. If you see `vitest not found` or similar, rerun `pnpm install` first.
+- **Key commands**: see "Build, Test, and Development Commands" section above. Summary:
+  - Lint/format/typecheck: `pnpm check`
+  - Tests: `OPENCLAW_TEST_PROFILE=low OPENCLAW_TEST_SERIAL_GATEWAY=1 pnpm test` (use low memory profile in Cloud VMs to avoid OOM)
+  - Build: `pnpm build`
+  - Run CLI in dev: `pnpm openclaw --dev <command>`
+  - Gateway dev: `OPENCLAW_SKIP_CHANNELS=1 pnpm openclaw --dev gateway --port 19001 --force` (skips channel connections that require external credentials)
+- **Gateway health check**: `curl -s http://127.0.0.1:19001/healthz` should return `{"ok":true,"status":"live"}` when the dev gateway is running.
+- **Control UI**: served by the gateway at `http://127.0.0.1:19001/`. No separate `pnpm ui:dev` step is needed unless you're iterating on UI code.
+- **No external services required**: the gateway uses file-based storage (JSON + SQLite). No database, Redis, or Docker is needed for development.
+- **LLM API keys**: required only for live/e2e tests and actual AI agent functionality. Unit tests run without any API keys.
+- **macOS/iOS/Android apps**: not buildable in Cloud VMs (require Xcode/Android SDK). Focus on the TypeScript core, gateway, CLI, and extensions.
